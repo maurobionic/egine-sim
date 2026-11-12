@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simulador de Motores</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-step="plan">
+  <header>
+    <div class="brand">⚙️ Simulador de Motores</div>
+    <nav class="steps">
+      <button data-step="plan">1 · Planejar</button>
+      <button data-step="build">2 · Montar</button>
+      <button data-step="dyno">3 · Dinamômetro</button>
+      <button data-step="drive">4 · Test drive</button>
+      <button data-step="inside">5 · Motor por dentro</button>
+    </nav>
+    <div class="tools">
+      <select id="preset" title="Carregar um projeto pronto"><option value="">Projetos prontos…</option></select>
+      <button id="btn-export" title="Salvar projeto em arquivo">Exportar</button>
+      <button id="btn-import" title="Abrir projeto salvo">Importar</button>
+      <input id="file" type="file" accept=".json,application/json" hidden>
+      <button id="btn-sound">🔈 Ligar som</button>
+      <input id="vol" type="range" min="0" max="100" value="70" title="Volume">
+    </div>
+  </header>
+
+  <main>
+    <aside>
+      <section class="only-plan" id="planner"></section>
+
+      <section class="only-build">
+        <div class="tabs" id="tabs"></div>
+        <div id="parts"></div>
+      </section>
+
+      <section class="only-dyno controls">
+        <h3>Dinamômetro de bancada</h3>
+        <p class="note" id="dyno-state">—</p>
+        <button id="btn-dyno-start" class="primary">Ligar motor (I)</button>
+        <div class="row"><label>Acelerador fixo <span id="thr-v">0%</span></label><input id="thr" type="range" min="0" max="100" value="0"></div>
+        <div class="row"><label>Carga do freio <span id="load-v">30%</span></label><input id="load" type="range" min="0" max="100" value="30"></div>
+        <button id="btn-sweep">Puxada em plena carga (curva)</button>
+        <p class="note">Segure <kbd>↑</kbd> para acelerar tudo. Ajuste a carga para segurar o motor numa rotação e ler os valores. A puxada mede a curva real, com lag de turbo, e desenha em branco sobre a curva calculada.</p>
+      </section>
+
+      <section class="only-drive controls">
+        <h3>Test drive na praia</h3>
+        <ul class="keys">
+          <li><kbd>↑</kbd>/<kbd>W</kbd> acelerar · <kbd>↓</kbd>/<kbd>S</kbd> frear</li>
+          <li><kbd>E</kbd>/<kbd>→</kbd> sobe marcha · <kbd>Q</kbd>/<kbd>←</kbd> reduz (N e R também)</li>
+          <li><kbd>C</kbd> embreagem (se a automática estiver desligada)</li>
+          <li><kbd>N</kbd> nitro · <kbd>I</kbd> liga/desliga · <kbd>R</kbd> volta para a largada · <kbd>M</kbd> mudo</li>
+        </ul>
+        <div class="row"><label>Acelerador fixo (controle de carga) <span id="thr-v2"></span></label><input id="thr2" type="range" min="0" max="100" value="0"></div>
+        <button id="btn-refill">Recarregar nitro</button>
+        <p class="note">A reta tem 700 m planos para medir 0–100 km/h e 400 m. Depois vêm os morros.</p>
+      </section>
+
+      <section class="only-inside controls">
+        <h3>Motor por dentro</h3>
+        <p class="note">Mostra o motor do test drive em tempo real: os mesmos comandos (<kbd>↑</kbd> acelera, <kbd>E</kbd>/<kbd>Q</kbd> marchas, <kbd>C</kbd> embreagem, <kbd>I</kbd> liga) continuam valendo, então dá para dirigir olhando o motor.</p>
+        <div class="row"><label>Câmera lenta</label>
+          <select id="slow"><option value="1">Tempo real (vira um borrão)</option><option value="0.1">1/10</option><option value="0.05" selected>1/20</option><option value="0.01">1/100</option><option value="0.002">1/500</option></select>
+        </div>
+      </section>
+
+      <section class="only-drive only-inside only-dyno controls">
+        <div id="health"></div>
+        <button id="btn-repair">Consertar motor</button>
+      </section>
+
+      <section id="summary"></section>
+      <section class="only-build">
+        <button id="btn-ghost">Fixar curva atual para comparar</button>
+        <p class="note">Segure <kbd>↑</kbd> aqui mesmo para acelerar o motor em ponto morto e ouvir cada mudança.</p>
+      </section>
+    </aside>
+
+    <section class="stage">
+      <div class="chart-wrap not-drive"><canvas id="dyno"></canvas></div>
+      <div class="drive-wrap only-drive"><canvas id="drive"></canvas></div>
+      <div class="inside-wrap only-inside">
+        <div class="cut"><canvas id="engine-cut"></canvas></div>
+        <div class="flow"><canvas id="engine-flow"></canvas></div>
+      </div>
+      <div class="live only-live">
+        <div class="strip-wrap"><canvas id="strip"></canvas></div>
+        <div id="telemetry" class="telemetry"></div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="src/main.js"></script>
+  <script type="module">
+    // o slider da tela de test drive espelha o do dinamômetro
+    const a = document.getElementById('thr'), b = document.getElementById('thr2');
+    b.oninput = () => { a.value = b.value; a.dispatchEvent(new Event('input')); document.getElementById('thr-v2').textContent = b.value + '%'; };
+  </script>
+</body>
+</html>
